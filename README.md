@@ -1,3 +1,6 @@
+MobileAutomation
+WDIO + APPIUM + JAVASCRIPT + ANDROID + ANDROID STUDIO + iOS + XCODE 
+
 Step1: Start the Appium Server
 appium -p 4725 --allow-cors
 

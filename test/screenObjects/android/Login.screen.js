@@ -7,6 +7,7 @@ class LoginScreen {
     get inputPassword() {
        return $('~test-Password');
     }
+
   
     get btnLogin() {
       return $('~test-LOGIN');
