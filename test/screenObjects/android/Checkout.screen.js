@@ -33,36 +33,19 @@ class CheckoutScreen {
     }
 
     async clickFinishButton() {
-        let isVisible = await this.finishButton.isDisplayed();
-        let attempts = 0;
-
-        while (!isVisible && attempts < 3) {
-            console.log(`Attempt ${attempts + 1}: Scrolling down to find the Finish button`);
-            await scrollDown();
-            isVisible = await this.finishButton.isDisplayed();
-            attempts++;
-        }
-
-        if (!isVisible) {
-            console.log('Performing additional scrolls to find the Finish button');
-            await scrollDown();
-            await browser.pause(500);
-            await scrollDown();
-            await browser.pause(500);
-            isVisible = await this.finishButton.isDisplayed();
-        }
-
-        if (isVisible) {
+        try {
+            if (!(await this.finishButton.isDisplayed())) {
+                console.log('Scrolling to find the Finish button...');
+                await $(`android=new UiScrollable(new UiSelector().scrollable(true)).scrollTextIntoView("FINISH")`);
+            }
             console.log('Finish button is visible, clicking it now');
             await this.finishButton.click();
-            await browser.pause(1000); // Ensure the click action is completed
-        } else {
-            throw new Error('Finish button is not visible after scrolling');
+            await browser.pause(1000);
+        } catch (error) {
+            throw new Error(`Finish button is not found after scrolling: ${error}`);
         }
-
-        // Wait for the checkout complete text to be displayed
-        await this.checkoutCompleteText.waitForDisplayed({ timeout: 5000 });
     }
+    
 }
 
 module.exports = new CheckoutScreen();

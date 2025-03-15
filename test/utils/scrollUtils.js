@@ -1,20 +1,19 @@
 async function scrollDown() {
-    await browser.performActions([
+    await driver.performActions([
         {
             type: 'pointer',
             id: 'finger1',
             parameters: { pointerType: 'touch' },
             actions: [
-                { type: 'pointerMove', duration: 0, x: 500, y: 1000 },
+                { type: 'pointerMove', duration: 0, x: 500, y: 1500 }, // Start higher
                 { type: 'pointerDown', button: 0 },
-                { type: 'pause', duration: 500 },
-                { type: 'pointerMove', duration: 700, x: 500, y: 300 },
+                { type: 'pause', duration: 1000 }, // Hold press a bit longer
+                { type: 'pointerMove', duration: 1500, x: 500, y: 200 }, // Move further down
                 { type: 'pointerUp', button: 0 }
             ]
         }
     ]);
+    await browser.pause(1000); // Allow time for the UI to settle
 }
 
-module.exports = {
-    scrollDown
-};
+module.exports = { scrollDown };

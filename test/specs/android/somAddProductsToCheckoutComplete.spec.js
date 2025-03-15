@@ -4,7 +4,7 @@ const ProductDetailsScreen = require("../../screenObjects/android/ProductDetails
 const CartScreen = require("../../screenObjects/android/Cart.screen");
 const CheckoutScreen = require("../../screenObjects/android/Checkout.screen");
 
-describe('Swag Labs Add Products to Cart and Checkout Tests', () => {
+describe('Add Products to Cart and Checkout Tests', () => {
 
     it('should add Product to the cart', async () => {
         // Login
