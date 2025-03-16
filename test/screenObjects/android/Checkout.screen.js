@@ -57,9 +57,11 @@ class CheckoutScreen {
             }
             console.log('Finish button is visible, clicking it now');
             await this.finishButton.click();
-            await browser.pause(1000);
+            // Replace browser.pause(1000) with explicit wait
+            await this.finishButton.waitForExist({ timeout: 5000, reverse: true, timeoutMsg: 'Finish button did not disappear after click within 5000ms' });
+
             console.log('Finish button is clicked');
-        } catch (error) {
+        }   catch (error) {
             throw new Error(`Finish button is not found after scrolling: ${error}`);
         }
     }
