@@ -6,7 +6,7 @@ const CheckoutScreen = require("../../screenObjects/android/Checkout.screen");
 
 describe('Add Products to Cart and Checkout Tests', () => {
 
-    it('should add Product to the cart', async () => {
+    it('should add Product to the cart and Checkout successfully', async () => {
         // Login
         await LoginScreen.login('standard_user', 'secret_sauce');
         await expect(ProductsScreen.productsHeader).toBeDisplayed();
@@ -28,7 +28,12 @@ describe('Add Products to Cart and Checkout Tests', () => {
 
         // Enter checkout information
         await CheckoutScreen.enterCheckoutInformation('John', 'Doe', '12345');
-        await expect(CheckoutScreen.checkoutCompleteText).toBeDisplayed();
+        await expect(CheckoutScreen.checkoutOverviewText).toBeDisplayed();
+
+        // Complete checkout
         await CheckoutScreen.clickFinishButton();
+        console.log(await CheckoutScreen.thankYouText.getText());
+        await browser.pause(1000);
+        await expect(CheckoutScreen.thankYouText).toBeDisplayed();
     });
 });

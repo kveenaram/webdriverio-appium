@@ -1,4 +1,3 @@
-
 const assert = require('assert');
 
 describe('Swag Labs Add Products to Cart and Checkout Tests', () => {
