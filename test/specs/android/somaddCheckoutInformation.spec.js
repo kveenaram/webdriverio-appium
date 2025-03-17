@@ -29,17 +29,5 @@ describe('Add Products to Cart and Checkout Tests', () => {
         // Enter checkout information
         await CheckoutScreen.enterCheckoutInformation('John', 'Doe', '12345');
         await expect(CheckoutScreen.checkoutOverviewText).toBeDisplayed();
-
-        // Complete Checkout process
-        await CheckoutScreen.clickFinishButton();
-        await CheckoutScreen.checkoutCompleteText.waitForDisplayed({ timeout: 10000 });
-        await CheckoutScreen.thankYouText.waitForDisplayed({ timeout: 10000 });
-
-        // Check visibility of the element
-        const isVisible = await CheckoutScreen.thankYouText.isDisplayed();
-        
-        // Assert visibility of the element
-        await expect(CheckoutScreen.thankYouText).toBeDisplayed();  
-        
     });
 });

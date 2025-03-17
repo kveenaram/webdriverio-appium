@@ -10,43 +10,59 @@ describe('Sort Item Tests', () => {
     it('should sort items from A to Z', async () => {
         const obtainedList = await HomePageScreen.getInventoryItemNames();
         console.log('Obtained list:', obtainedList);
-    
+
         await HomePageScreen.clickSortButton();
         await HomePageScreen.clickSortAZ();
-    
+
         const sortedObtainedList = await HomePageScreen.getInventoryItemNames();
         console.log('Sorted obtained list:', sortedObtainedList);
-    
+
         const expectedSortedList = [...obtainedList].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
         console.log('Expected sorted list:', expectedSortedList);
-    
+
         expect(sortedObtainedList).toEqual(expectedSortedList);
     });
 
+
     it.only('should sort items from Z to A', async () => {
-        // Get the initial list of items
-        const initialList = await HomePageScreen.getInventoryItemNames();
-        console.log('Initial list before sorting:', initialList);
+        // Wait for app to load
+        await browser.pause(3000);
         
-        // Click the sort button and select Z to A sorting
+        // Get initial list
+        let initialList = await HomePageScreen.getInventoryItemNames();
+        console.log('Initial list:', initialList);
+        
+        if (initialList.length < 4) {
+            console.warn('WARNING: Found fewer items than expected.');
+        }
+        
+        // Take screenshot to debug
+        await browser.saveScreenshot('./before-sort.png');
+        
+        // Sort Z-A
         await HomePageScreen.clickSortButton();
         await HomePageScreen.clickSortZA();
         
-        // Wait to allow sorting to complete
-        await browser.pause(5000);
+        // Wait for UI to stabilize
+        await browser.pause(2000);
         
-        // Get the sorted list after applying Z to A sorting
-        const sortedObtainedList = await HomePageScreen.getInventoryItemNames();
-        console.log('Sorted obtained list:', sortedObtainedList);
+        // Take screenshot after sorting
+        await browser.saveScreenshot('./after-sort.png');
         
-        // Sort the initial list in reverse order to get the expected sorted list
-        const expectedSortedList = [...initialList].sort((a, b) => b.localeCompare(a));
-        console.log('Expected sorted list:', expectedSortedList);
+        // Get sorted list
+        let sortedObtainedList = await HomePageScreen.getInventoryItemNames();
+        console.log('Sorted list:', sortedObtainedList);
         
-        // Compare the obtained sorted list with the expected sorted list
+        // Generate expected list
+        let expectedSortedList = [...initialList].sort((a, b) => 
+            b.localeCompare(a, undefined, { sensitivity: 'base' })
+        );
+        
+        // Assertion
         expect(sortedObtainedList).toEqual(expectedSortedList);
     });
-    
+
+
 
     it('should sort items from low to high price', async () => {
         await HomePageScreen.clickSortButton();

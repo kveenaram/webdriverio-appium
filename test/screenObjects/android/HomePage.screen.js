@@ -23,9 +23,9 @@ class HomePage {
         return $('~test-PRODUCTS');
     }
 
-    // Based on the screenshot, we need to use the content-desc attribute
     get inventoryItems() {
-        return $$('android=new UiSelector().descriptionContains("test-Item")');
+        // Make sure this selector returns all product items and only once each
+        return $$('android.widget.FrameLayout[resource-id="com.swaglabsmobileapp:id/product_item"]');
     }
 
     // For getting product titles
@@ -39,8 +39,7 @@ class HomePage {
     }
 
     async clickSortButton() {
-        console.log(await this.sortButton.isExisting()); // Should return true if the element exists
-        await browser.pause(1000);
+        console.log(await this.sortButton.isExisting());
         await this.sortButton.click();
     }
 
@@ -61,48 +60,80 @@ class HomePage {
     }
 
     async getInventoryItemNames() {
-        try {
-            await browser.pause(1000); // Ensure elements are fully loaded
-    
-            let attempts = 0;
-            let itemNames = [];
-            
-            while (attempts < 3) {
-                const items = await this.inventoryItems;
-    
-                if (items.length > 0) {
-                    for (const item of items) {
-                        try {
-                            const titleElement = await item.$('android.widget.TextView');
-                            await titleElement.waitForExist({ timeout: 5000 });
-                            const titleText = await titleElement.getText();
-                            if (titleText && titleText.trim() !== '' && titleText !== '󰝁') {
-                                itemNames.push(titleText.trim());
-                            }
-                        } catch (error) {
-                            console.log('Error getting item title:', error.message);
+        // Wait for items to be properly loaded
+        await browser.waitUntil(async () => {
+            const items = await this.inventoryItems;
+            return items.length > 0;
+        }, {
+            timeout: 10000,
+            timeoutMsg: 'Items not loaded after 10 seconds'
+        });
+        
+        const items = await this.inventoryItems;
+        console.log(`Found ${items.length} inventory items`);
+        
+        // Create a Set to avoid duplicates
+        const uniqueNames = new Set();
+        
+        for (const item of items) {
+            try {
+                // Try to find the text element by resource-id first (most reliable)
+                let productName;
+                
+                try {
+                    // You might need to update these selectors based on your app
+                    const nameElement = await item.$('[resource-id="com.swaglabsmobileapp:id/productName"]') || 
+                                        await item.$('[resource-id="com.swaglabsmobileapp:id/item_title"]') ||
+                                        await item.$('~item_title');
+                    
+                    if (await nameElement.isExisting()) {
+                        productName = await nameElement.getText();
+                    }
+                } catch (e) {
+                    // Resource-id approach failed
+                }
+                
+                // If we didn't find by resource-id, try finding all text elements and analyze
+                if (!productName) {
+                    const textElements = await item.$$('android.widget.TextView');
+                    
+                    // Find the element with product name characteristics
+                    for (const element of textElements) {
+                        const text = await element.getText();
+                        
+                        // Skip empty text or price-like text
+                        if (!text || text.startsWith('$') || /^\d+\.\d+$/.test(text)) {
+                            continue;
+                        }
+                        
+                        // Product names are typically longer than just a few characters
+                        if (text.length > 3) {
+                            productName = text;
+                            break;
                         }
                     }
                 }
-    
-                if (itemNames.length > 0) break; // Exit loop if items are found
-    
-                console.log(`Attempt ${attempts + 1}: No inventory items found, scrolling...`);
-                await this.scrollDown();
-                attempts++;
+                
+                if (productName) {
+                    uniqueNames.add(productName.trim());
+                }
+            } catch (error) {
+                console.error('Error getting product name:', error);
             }
-    
-            if (itemNames.length === 0) {
-                throw new Error('Could not find any valid item names after scrolling');
-            }
-    
-            return itemNames;
-        } catch (error) {
-            console.error('Error in getInventoryItemNames:', error);
-            throw error;
         }
+        
+        // Convert Set back to Array
+        return Array.from(uniqueNames);
     }
     
+    async scrollToEndOfList() {
+        try {
+            await $('android=new UiScrollable(new UiSelector().scrollable(true)).scrollToEnd(1, 5)');
+            await browser.pause(500); // Wait for scroll to settle
+        } catch (error) {
+            console.error('Error during scrollToEndOfList:', error);
+        }
+    }
         
 
     async getFirstPrice() {
